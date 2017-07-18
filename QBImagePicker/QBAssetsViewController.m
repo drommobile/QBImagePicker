@@ -411,7 +411,12 @@ static CGSize CGSizeScale(CGSize size, CGFloat scale) {
                     
                     NSIndexSet *changedIndexes = [collectionChanges changedIndexes];
                     if ([changedIndexes count]) {
-                        [self.collectionView reloadItemsAtIndexPaths:[changedIndexes qb_indexPathsFromIndexesWithSection:0]];
+                        // We need to remove indexes from removedIndexes, since reloading them will cause a crash
+                        // "uncaught ObjC exception, reason: attempt to delete and reload the same index path"
+                        NSMutableIndexSet *changedIndexesCopy = [changedIndexes mutableCopy];
+                        [changedIndexesCopy removeIndexes:removedIndexes];
+
+                        [self.collectionView reloadItemsAtIndexPaths:[changedIndexesCopy qb_indexPathsFromIndexesWithSection:0]];
                     }
                 } completion:NULL];
             }
